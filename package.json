@@ -1,6 +1,6 @@
 {
-  "name": "loja",
-  "private": true,
+  "name": "lax-beauty-store",
+  
   "version": "0.0.0",
   "type": "module",
   "scripts": {
