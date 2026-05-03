@@ -1,13 +1,202 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>loja</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="./src/main.jsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+  <meta charset="UTF-8">
+  <title>LAX BEAUTY</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #0f0f0f;
+      color: white;
+      margin: 0;
+    }
+
+    nav {
+      display: flex;
+      gap: 10px;
+      padding: 20px;
+      background: #1a1a1a;
+    }
+
+    button {
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .card {
+      background: #1a1a1a;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    input,
+    select {
+      display: block;
+      margin: 5px 0;
+      padding: 8px;
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav>
+    <button onclick="go('home')">Home</button>
+    <button onclick="go('shop')">Shop</button>
+    <button onclick="go('cart')">Cart (<span id="count">0</span>)</button>
+  </nav>
+
+  <div id="app"></div>
+
+  <script>
+    const products = [
+      { id: 1, name: "Radiance Cream", price: 29.99 },
+      { id: 2, name: "Glow Serum", price: 34.99 },
+      { id: 3, name: "Lipstick Velvet", price: 18.5 }
+    ];
+
+    const shippingOptions = [
+      { id: "standard", name: "CTT Standard", price: 3.5 },
+      { id: "express", name: "CTT Express", price: 8 }
+    ];
+
+    let cart = [];
+    let page = "home";
+
+    function go(p) {
+      page = p;
+      render();
+    }
+
+    function add(id) {
+      const item = products.find(p => p.id === id);
+      const exists = cart.find(i => i.id === id);
+
+      if (exists) {
+        exists.qty++;
+      } else {
+        cart.push({ ...item, qty: 1 });
+      }
+
+      updateCount();
+    }
+
+    function updateQty(id, val) {
+      const item = cart.find(i => i.id === id);
+      item.qty = Math.max(1, item.qty + val);
+      render();
+    }
+
+    function removeItem(id) {
+      cart = cart.filter(i => i.id !== id);
+      updateCount();
+      render();
+    }
+
+    function updateCount() {
+      document.getElementById("count").innerText =
+        cart.reduce((a, c) => a + c.qty, 0);
+    }
+
+    function render() {
+      const app = document.getElementById("app");
+
+      if (page === "home") {
+        app.innerHTML = `
+      <div style="padding:40px;text-align:center">
+        <h1>💄 LAX BEAUTY</h1>
+        <p>Luxury Beauty Store</p>
+      </div>
+    `;
+      }
+
+      if (page === "shop") {
+        app.innerHTML = `
+      <div class="grid">
+        ${products.map(p => `
+          <div class="card">
+            <h3>${p.name}</h3>
+            <p>€${p.price}</p>
+            <button onclick="add(${p.id})">Add</button>
+          </div>
+        `).join("")}
+      </div>
+    `;
+      }
+
+      if (page === "cart") {
+
+        const subtotal = cart.reduce((a, i) => a + i.price * i.qty, 0);
+
+        app.innerHTML = `
+      <div style="padding:20px">
+
+        ${cart.map(i => `
+          <div style="display:flex;justify-content:space-between">
+            <span>${i.name}</span>
+
+            <div>
+              <button onclick="updateQty(${i.id},-1)">-</button>
+              ${i.qty}
+              <button onclick="updateQty(${i.id},1)">+</button>
+            </div>
+
+            <button onclick="removeItem(${i.id})">x</button>
+          </div>
+        `).join("")}
+
+        <h3>Total: €${subtotal.toFixed(2)}</h3>
+
+        <input placeholder="Nome" id="name">
+        <input placeholder="Morada" id="address">
+        <input placeholder="Email" id="email">
+
+        <select id="shipping">
+          ${shippingOptions.map(s => `
+            <option value="${s.price}">
+              ${s.name} (€${s.price})
+            </option>
+          `).join("")}
+        </select>
+
+        <button onclick="checkout()">Confirmar Compra</button>
+
+        <p id="msg" style="color:red"></p>
+      </div>
+    `;
+      }
+    }
+
+    function checkout() {
+      const name = document.getElementById("name").value;
+      const address = document.getElementById("address").value;
+      const email = document.getElementById("email").value;
+
+      if (!name || !address || !email) {
+        document.getElementById("msg").innerText = "Preenche tudo!";
+        return;
+      }
+
+      alert("Encomenda feita! (simulação)");
+
+      cart = [];
+      updateCount();
+      go("home");
+    }
+
+    render();
+  </script>
+
+</body>
+
 </html>
